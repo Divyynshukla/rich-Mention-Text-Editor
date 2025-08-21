@@ -24,7 +24,7 @@ Two official plugins can be used:
 
 ```jsx
 import { useCallback, useState } from "react";
-import OptimizedMentionEditor from "./MentionsTextEditor";
+import SmartMentionEditor from "./MentionsTextEditor";
 
 function Example() {
   const [mentionValues, setMentionsValues] = useState({
@@ -51,7 +51,7 @@ function Example() {
 
   return (
     <div>
-      <OptimizedMentionEditor
+      <SmartMentionEditor
         editorId="editor-1"
         mentionTags={mentionTags}
         onContentChange={onContentChange}
@@ -66,7 +66,7 @@ function Example() {
         error=""
       />
 
-      <OptimizedMentionEditor
+      <SmartMentionEditor
         editorId="editor-2"
         mentionTags={mentionTags}
         onContentChange={onContentChange}
