@@ -1,4 +1,4 @@
-import OptimizedMentionEditor from "./MentionsTextEditor";
+import SmartMentionEditor from "./MentionsTextEditor";
 
-export {OptimizedMentionEditor}
-export default OptimizedMentionEditor
+export {SmartMentionEditor}
+export default SmartMentionEditor

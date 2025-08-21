@@ -357,7 +357,7 @@ const useValidation = (editorId, onValidationChange) => {
 };
 
 // ========================= MAIN COMPONENT =========================
-const OptimizedMentionEditor = ({
+const SmartMentionEditor = ({
   editorId = 'mention-editor-1',
   mentionTags = [],
   initialContent = '',
@@ -1007,4 +1007,4 @@ const OptimizedMentionEditor = ({
   );
 };
 
-export default OptimizedMentionEditor;
+export default SmartMentionEditor;

@@ -1,5 +1,5 @@
 import { useCallback, useState } from "react"
-import OptimizedMentionEditor from './MentionsTextEditor'
+import SmartMentionEditor from './MentionsTextEditor'
 
 function App() {
   const [mentionValues, setMentionsValues] = useState({ add_to_cart: "value of cart" })
@@ -29,7 +29,7 @@ function App() {
     <div style={{ margin: "10rem" }}>
        
        <div style={{margin:'1rem' ,width:"30rem"}}>
-        <OptimizedMentionEditor
+        <SmartMentionEditor
           editorId='mentionFieldValue'
           mentionTags={mentionTags}
           initialContent={initialValues.mentionFieldValue1}
@@ -49,7 +49,7 @@ function App() {
 
         
       <div style={{margin:'1rem' ,width:"30rem"}}>
-        <OptimizedMentionEditor
+        <SmartMentionEditor
           editorId='mentionFieldValue2'
           mentionTags={mentionTags}
           initialContent={initialValues.mentionFieldValue2}
