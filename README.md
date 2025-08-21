@@ -22,7 +22,71 @@ Two official plugins can be used:
 
 ## Example
 
-  ```jsx import { useCallback, useState } from "react"; import OptimizedMentionEditor from "./MentionsTextEditor"; function Example() { const [mentionValues, setMentionsValues] = useState({ add_to_cart: "value of cart" }); const [value, setValue] = useState(""); const mentionTags = ["add_to_cart", "price", "flying_to"]; const onContentChange = useCallback((text, html) => { setValue(text); }, []); const onMentionValueChange = useCallback((id, value) => { setMentionsValues((prev) => ({ ...prev, [id]: value })); }, []); const handleBlur = () => { // handle blur event }; return ( <div> <OptimizedMentionEditor editorId="editor-1" mentionTags={mentionTags} onContentChange={onContentChange} onValidationChange={(one, two) => {}} onMentionValueChange={onMentionValueChange} className="" disabled={false} showMentionInput showEmoji mentionValues={mentionValues} onBlur={handleBlur} error="" /> <OptimizedMentionEditor editorId="editor-2" mentionTags={mentionTags} onContentChange={onContentChange} onValidationChange={(one, two) => {}} onMentionValueChange={onMentionValueChange} className="" disabled={false} mentionValues={mentionValues} onBlur={() => {}} error="" style={{ border: "1px solid #ddd" }} isUrlField /> </div> ); } export default Example; ``` 
+```jsx
+import { useCallback, useState } from "react";
+import OptimizedMentionEditor from "./MentionsTextEditor";
+
+function Example() {
+  const [mentionValues, setMentionsValues] = useState({
+    add_to_cart: "value of cart"
+  });
+
+  const [value, setValue] = useState("");
+  const mentionTags = ["add_to_cart", "price", "flying_to"];
+
+  const onContentChange = useCallback((text, html) => {
+    setValue(text);
+  }, []);
+
+  const onMentionValueChange = useCallback((id, value) => {
+    setMentionsValues((prev) => ({
+      ...prev,
+      [id]: value
+    }));
+  }, []);
+
+  const handleBlur = () => {
+    // handle blur event
+  };
+
+  return (
+    <div>
+      <OptimizedMentionEditor
+        editorId="editor-1"
+        mentionTags={mentionTags}
+        onContentChange={onContentChange}
+        onValidationChange={(one, two) => {}}
+        onMentionValueChange={onMentionValueChange}
+        className=""
+        disabled={false}
+        showMentionInput
+        showEmoji
+        mentionValues={mentionValues}
+        onBlur={handleBlur}
+        error=""
+      />
+
+      <OptimizedMentionEditor
+        editorId="editor-2"
+        mentionTags={mentionTags}
+        onContentChange={onContentChange}
+        onValidationChange={(one, two) => {}}
+        onMentionValueChange={onMentionValueChange}
+        className=""
+        disabled={false}
+        mentionValues={mentionValues}
+        onBlur={() => {}}
+        error=""
+        style={{ border: "1px solid #ddd" }}
+        isUrlField
+      />
+    </div>
+  );
+}
+
+export default Example;
+```
+
 
 
 
