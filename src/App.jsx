@@ -26,8 +26,9 @@ function App() {
   }
 
   return (
-    <div style={{ margin: "20rem" }}>
-
+    <div style={{ margin: "10rem" }}>
+       
+       <div style={{margin:'1rem' ,width:"30rem"}}>
         <OptimizedMentionEditor
           editorId='mentionFieldValue'
           mentionTags={mentionTags}
@@ -39,13 +40,15 @@ function App() {
           onMentionValueChange={onMentionValueChange}
           className=''
           disabled={false}
+          showMentionInput
           mentionValues={mentionValues}
           onBlur={handleBlur}
           error={''}
         />
+       </div>
 
-
-
+        
+      <div style={{margin:'1rem' ,width:"30rem"}}>
         <OptimizedMentionEditor
           editorId='mentionFieldValue2'
           mentionTags={mentionTags}
@@ -60,7 +63,10 @@ function App() {
           mentionValues={mentionValues}
           onBlur={(e) => { }}
           error=''
+          style
+          isUrlField
         />
+      </div>
     </div>
   )
 }

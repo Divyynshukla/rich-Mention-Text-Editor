@@ -1,7 +1,6 @@
 import React, { useState, useEffect, useRef, useCallback, useMemo } from "react";
 import EmojiPicker from "./EmojiPicker";
-// import { AtSign, Smile } from "lucide-react";
-// import { EmojiEmotionsOutlined } from "@mui/icons-material";
+
 
 // ========================= CONSTANTS =========================
 const CONSTANTS = {
@@ -82,7 +81,7 @@ class DOMUtils {
     }
   }
 
-  static createMentionElement(tag, value, editorId, handlers) {
+  static createMentionElement(tag, value, editorId, handlers,showMentionInput) {
     const wrapper = document.createElement('span');
     wrapper.className = 'mention-wrapper';
     wrapper.contentEditable = 'false';
@@ -111,7 +110,9 @@ class DOMUtils {
     input.addEventListener('focus', handlers.onInputFocus);
 
     wrapper.appendChild(label);
-    wrapper.appendChild(input);
+    if(showMentionInput){
+        wrapper.appendChild(input);
+    }
 
     return wrapper;
   }
@@ -163,23 +164,25 @@ class DOMUtils {
 }
 
 class TextParser {
-  static parseTextToHTML(text, mentionTags, mentionValues, editorId) {
-    if (!text) return '';
+    static parseTextToHTML(text, mentionTags, mentionValues, editorId,showMentionInput) {
+        if (!text) return '';
 
-    // Handle URLs
-    let result = text.replace(CONSTANTS.URL_PATTERN, (url) => {
-      return `<a href="${url}" target="_blank" rel="noopener noreferrer">${url}</a>`;
-    });
+        // Handle URLs
+        let result = text.replace(CONSTANTS.URL_PATTERN, (url) => {
+            return `<a href="${url}" target="_blank" rel="noopener noreferrer">${url}</a>`;
+        });
 
-    // Handle mentions
-    result = result.replace(CONSTANTS.MENTION_PATTERN, (mention, mentionText) => {
-      mentionText = mentionText.trim();
-      const matchingTag = mentionTags.find(tag => mentionText.includes(tag));
+        // Handle mentions
+        result = result.replace(CONSTANTS.MENTION_PATTERN, (mention, mentionText) => {
+            mentionText = mentionText.trim();
+            const matchingTag = mentionTags.find(tag => mentionText.includes(tag));
 
-      if (matchingTag) {
-        const inputValue = mentionValues[mentionText] || CONSTANTS.DEFAULT_VALUE;
+            if (matchingTag) {
 
-        return ` <span class="mention-wrapper" contenteditable="false" style="display:inline-flex;align-items:center;background-color:#e3f2ff;padding:3.5px;color:#4a7cb5;border-radius:4px;margin:0 2px;">
+                if (showMentionInput) {
+                    const inputValue = mentionValues[mentionText] || CONSTANTS.DEFAULT_VALUE;
+
+                    return ` <span class="mention-wrapper" contenteditable="false" style="display:inline-flex;align-items:center;background-color:#e3f2ff;padding:3.5px;color:#4a7cb5;border-radius:4px;margin:0 2px;">
                <span style="display:inline-block;max-width:150px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-right:4px;">
                @${matchingTag}
               </span>
@@ -187,48 +190,43 @@ class TextParser {
              style="width:7rem;height:16px;border:1px solid lightgrey;outline:none;font-size:0.75rem;padding:2px 4px;" 
             value="${inputValue}">
              </span> ${mentionText.slice(matchingTag.length)}`;
-      }
-      return mention;
-    });
+                }
+                else {
+                    return ` <span class="mention-wrapper" contenteditable="false" style="display:inline-flex;align-items:center;background-color:#e3f2ff;padding:3.5px;color:#4a7cb5;border-radius:4px;margin:0 2px;">
+               <span style="display:inline-block;max-width:150px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-right:4px;">
+               @${matchingTag}
+              </span>
+             </span> ${mentionText.slice(matchingTag.length)}`;
+                }
+            }
 
-    return result;
-  }
+            return mention;
+        });
 
-  static extractMentionsFromText(text, mentionTags) {
-    const mentions = [];
-    const matches = text.matchAll(CONSTANTS.MENTION_PATTERN);
-    
-    for (const match of matches) {
-      const mentionText = match[1].trim();
-      const matchingTag = mentionTags.find(tag => mentionText.includes(tag));
-      
-      if (matchingTag && !mentions.includes(matchingTag)) {
-        mentions.push(matchingTag);
-      }
+        return result;
     }
-    
-    return mentions;
-  }
 
-  static cleanText(text) {
-    // Remove standalone @ characters
-    return text.replace(/(^|\s)@(?!\S)/g, "$1");
-  }
+    static extractMentionsFromText(text, mentionTags) {
+        const mentions = [];
+        const matches = text.matchAll(CONSTANTS.MENTION_PATTERN);
 
-  static removeStandaloneAtCharacters = (editorId) => {
-    const editor = document.getElementById(editorId);
+        for (const match of matches) {
+            const mentionText = match[1].trim();
+            const matchingTag = mentionTags.find(tag => mentionText.includes(tag));
 
-    if (editor) {
-      const traverseAndClean = (node) => {
-        if (node.nodeType === Node.TEXT_NODE) {
-          node.textContent = node.textContent.replace(/(^|\s)@(?!\S)/g, "$1");
-        } else if (node.nodeType === Node.ELEMENT_NODE) {
-          node.childNodes.forEach(traverseAndClean);
+            if (matchingTag && !mentions.includes(matchingTag)) {
+                mentions.push(matchingTag);
+            }
         }
-      };
-      traverseAndClean(editor);
+
+        return mentions;
     }
-  };
+
+    static cleanText(text) {
+        // Remove standalone @ characters
+        return text.replace(/(^|\s)@(?!\S)/g, "$1");
+    }
+
 }
 
 class ValidationUtils {
@@ -373,8 +371,10 @@ const OptimizedMentionEditor = ({
   onBlur,
   error,
   disabled = false,
+  showMentionInput = false,
   mentionValues = {},
-  locale = 'en'
+  locale = 'en',
+  isUrlField,
 }) => {
   // State
   const [content, setContent] = useState(initialContent);
@@ -465,7 +465,8 @@ const OptimizedMentionEditor = ({
         textContent,
         mentionTags,
         mentionValues,
-        editorId
+        editorId,
+        showMentionInput
       );
       
       if (parsedHTML !== editorRef.current.innerHTML) {
@@ -527,7 +528,8 @@ const OptimizedMentionEditor = ({
       tag,
       mentionValues?.[tag],
       editorId,
-      inputHandlers
+      inputHandlers,
+      showMentionInput
     );
 
     // Insert mention
@@ -720,7 +722,8 @@ const OptimizedMentionEditor = ({
           textContent, 
           mentionTags, 
           mentionValues, 
-          editorId
+          editorId,
+          showMentionInput
         );
         
         editorRef.current.innerHTML = parsedHTML;
@@ -796,7 +799,8 @@ const OptimizedMentionEditor = ({
       initialContent,
       mentionTags,
       mentionValues,
-      editorId
+      editorId,
+      showMentionInput
     );
     
     editorRef.current.innerHTML = parsedHTML;
@@ -808,8 +812,8 @@ const OptimizedMentionEditor = ({
     ...STYLES.container,
     border: `1px solid ${(validation.errors.length > 0 || error) ? '#f44336' : '#ccc'}`,
     borderRadius: '4px',
-    padding: '12px',
-    minHeight: '40px',
+    padding: isUrlField ? '8px' : '12px 25px 12px 12px' ,
+    minHeight: isUrlField ? '10px' : '40px',
     maxHeight: '200px',
     overflow: 'auto',
     outline: 'none',
@@ -878,7 +882,7 @@ const OptimizedMentionEditor = ({
         </div>
 
       {/* Action Icons */}
-      <div style={{ position: 'absolute', right: 8, top: 8, gap: 4 }}>
+      <div style={{ position: 'absolute', right: 8, top: 8, gap: 4 ,display : isUrlField && "flex"}}>
         {mentionTags.length > 0 && (
           <button
             type="button"
@@ -893,7 +897,6 @@ const OptimizedMentionEditor = ({
             }}
             title="Insert mention"
           >
-            {/* <AtSign size={16} /> */}
             &#64;
           </button>
         )}
@@ -919,7 +922,6 @@ const OptimizedMentionEditor = ({
         )}
       </div>
 
-      {/* Mention Suggestions */}
       {showSuggestions && mentionTags.length > 0 && (
         <div
           ref={suggestionsRef}
@@ -982,10 +984,6 @@ const OptimizedMentionEditor = ({
         
         .mention-editor-content:focus:before {
           display: none;
-        }
-        
-        .mention-wrapper {
-          user-select: none;
         }
         
         .mention-wrapper input {
