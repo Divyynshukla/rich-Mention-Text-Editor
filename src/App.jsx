@@ -54,7 +54,7 @@ function App() {
           mentionTags={mentionTags}
           initialContent={initialValues.mentionFieldValue2}
           placeholder='Type your message...'
-          showEmoji
+          // showEmoji
           onContentChange={(text, html) => { }}
           onValidationChange={(one, two) => { }}
           onMentionValueChange={onMentionValueChange}

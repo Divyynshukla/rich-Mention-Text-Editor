@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef, useCallback, useMemo } from "react";
-import EmojiPicker from "./EmojiPicker";
+// import EmojiPicker from "./EmojiPicker";
 
 
 // ========================= CONSTANTS =========================
@@ -381,6 +381,7 @@ const OptimizedMentionEditor = ({
   const [showSuggestions, setShowSuggestions] = useState(false);
   const [showEmojiPicker, setShowEmojiPicker] = useState(false);
 //   const [mentionValues, setMentionValues] = useState({});
+  const [EmojiPickerComponent,setEmojiPickerComponent] = useState(null)  
   const [savedRange,setCurrentRange] =  useState(null);
   const [anchorEl, setAnchorEl] = useState(null);
   // Refs
@@ -490,6 +491,18 @@ const OptimizedMentionEditor = ({
       }
     }
   }, [mentionTags, mentionValues, editorId, attachInputEventListeners]);
+
+  useEffect(() => {
+    if (showEmoji) {
+      import("./EmojiPicker")
+        .then((mod) => setEmojiPickerComponent(() => mod.default))
+        .catch(() => {
+          console.error(
+            "Please install @emoji-mart/react and @emoji-mart/data to use emoji picker."
+          );
+        });
+    }
+  }, [showEmoji]);
 
   const insertMention = useCallback((tag) => {
     if (!currentRangeRef.current || !editorRef.current) return;
@@ -972,7 +985,7 @@ const OptimizedMentionEditor = ({
       )}
 
      
-     {showEmoji && <EmojiPicker emojiPickerRef={emojiPickerRef} open={showEmojiPicker} onClose={() => setShowEmojiPicker(false)} anchorEl={anchorEl} onSelect={(emoji) => insertEmoji(emoji, editorId)} locale={locale}/>}
+     {showEmoji && EmojiPickerComponent && <EmojiPickerComponent emojiPickerRef={emojiPickerRef} open={showEmojiPicker} onClose={() => setShowEmojiPicker(false)} anchorEl={anchorEl} onSelect={(emoji) => insertEmoji(emoji, editorId)} locale={locale}/>}
 
       {/* CSS */}
       <style jsx>{`
