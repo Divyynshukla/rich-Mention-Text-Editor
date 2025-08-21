@@ -1,62 +1,66 @@
-import { Form, Formik,Field } from "formik";
 import { useCallback, useState } from "react"
 import OptimizedMentionEditor from './MentionsTextEditor'
-import * as Yup from 'Yup'
 
 function App() {
-  // const [text,setText] = useState('')
-  const [mentions,setMentions] = useState({})
-  const [value,setValue] = useState("");
+  const [mentionValues, setMentionsValues] = useState({ add_to_cart: "value of cart" })
+  const [value, setValue] = useState("");
 
-  const mentionTags = ['karamjeet','abhishek' , 'akshay']
-  const onContentChange = useCallback((text,html,form) => {
+  const mentionTags = ['add_to_cart', 'price', 'flying_to']
+  const onContentChange = useCallback((text, html) => {
     setValue(text)
-    console.log("form",form)
-    form.setFieldValue('mentionFieldValue', text?.replace(/\n/g, ''));
-  },[])
-  const onMentionValueChange = useCallback((id,value) => {
-    setMentions((prevMentions) => ({
-      ...prevMentions,  
-      [id]: value        
+  }, [])
+  const onMentionValueChange = useCallback((id, value) => {
+    setMentionsValues((prevMentions) => ({
+      ...prevMentions,
+      [id]: value
     }));
-  },[])
+  }, [])
 
   const initialValues = {
-    mentionFieldValue : '@karamjeet singh sdcbsdjhc'
+    mentionFieldValue1: '',
+    mentionFieldValue2: ''
   }
 
-  console.log("mentions",mentions)
-  const validationSchema = Yup.object({
-    mentionFieldValue: Yup.string()
-      .required("This field is required") 
-      .min(3, "Must be at least 3 characters") 
-  });
+  const handleBlur = () => {
+
+  }
 
   return (
-    <div style={{margin:"20rem"}}> 
-    <Formik initialValues={initialValues} validationSchema={validationSchema}>
-      <Form>
-      <Field name="mentionFieldValue">{({form,field,meta})=>(
-      <OptimizedMentionEditor
-    editorId = 'mentionFieldValue'
-    mentionTags = {mentionTags}
-    initialContent = {initialValues.mentionFieldValue}
-    placeholder = 'Type your message...'
-    showEmoji
-    onContentChange = {(text,html)=>onContentChange(text,html,form)}
-    onValidationChange = {(one,two)=>{}}
-    onMentionValueChange = {onMentionValueChange}
-    className = ''
-    disabled = {false}
-    onBlur = {(e)=>form.setFieldTouched('mentionFieldValue',true)}
-    error = {meta.touched && meta.error}
-    />
-  )}</Field>
-      </Form>
-    </Formik>
+    <div style={{ margin: "20rem" }}>
+
+        <OptimizedMentionEditor
+          editorId='mentionFieldValue'
+          mentionTags={mentionTags}
+          initialContent={initialValues.mentionFieldValue1}
+          placeholder='Type your message...'
+          showEmoji
+          onContentChange={(text, html) => onContentChange(text, html)}
+          onValidationChange={(one, two) => { }}
+          onMentionValueChange={onMentionValueChange}
+          className=''
+          disabled={false}
+          mentionValues={mentionValues}
+          onBlur={handleBlur}
+          error={''}
+        />
 
 
-    {value==="" ? "Can not empty" : ""}
+
+        <OptimizedMentionEditor
+          editorId='mentionFieldValue2'
+          mentionTags={mentionTags}
+          initialContent={initialValues.mentionFieldValue2}
+          placeholder='Type your message...'
+          showEmoji
+          onContentChange={(text, html) => { }}
+          onValidationChange={(one, two) => { }}
+          onMentionValueChange={onMentionValueChange}
+          className=''
+          disabled={false}
+          mentionValues={mentionValues}
+          onBlur={(e) => { }}
+          error=''
+        />
     </div>
   )
 }

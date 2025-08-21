@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef, useCallback, useMemo } from "react";
+import EmojiPicker from "./EmojiPicker";
 // import { AtSign, Smile } from "lucide-react";
 // import { EmojiEmotionsOutlined } from "@mui/icons-material";
 
@@ -360,7 +361,7 @@ const useValidation = (editorId, onValidationChange) => {
 // ========================= MAIN COMPONENT =========================
 const OptimizedMentionEditor = ({
   editorId = 'mention-editor-1',
-  mentionTags = ['name', 'email', 'company'],
+  mentionTags = [],
   initialContent = '',
   placeholder = 'Type your message...',
   showEmoji = false,
@@ -371,21 +372,24 @@ const OptimizedMentionEditor = ({
   style = {},
   onBlur,
   error,
-  disabled = false
+  disabled = false,
+  mentionValues = {},
+  locale = 'en'
 }) => {
   // State
   const [content, setContent] = useState(initialContent);
   const [showSuggestions, setShowSuggestions] = useState(false);
   const [showEmojiPicker, setShowEmojiPicker] = useState(false);
-  const [mentionValues, setMentionValues] = useState({});
+//   const [mentionValues, setMentionValues] = useState({});
   const [savedRange,setCurrentRange] =  useState(null);
-
+  const [anchorEl, setAnchorEl] = useState(null);
   // Refs
   const editorRef = useRef(null);
   const suggestionsRef = useRef(null);
   const currentRangeRef = useRef(null);
   const AtCharRef = useRef(null);
-
+  const emojiPickerRef = useRef(null);
+  const emojiIconRef = useRef(null); 
   // Custom hooks
   const suggestions = useMentionSuggestions(mentionTags, showSuggestions);
   const validation = useValidation(editorId, onValidationChange);
@@ -396,14 +400,14 @@ const OptimizedMentionEditor = ({
     const { value } = event.target;
     const mentionId = event.target.dataset.mentionId;
     
-    setMentionValues(prev => ({
-      ...prev,
-      [mentionId]: value
-    }));
+    // setMentionValues(prev => ({
+    //   ...prev,
+    //   [mentionId]: value
+    // }));
 
     onMentionValueChange?.(mentionId, value);
     validation.debouncedValidate(editorRef.current);
-  }, [onMentionValueChange, validation]);
+  }, [onMentionValueChange, validation,mentionValues]);
 
   const handleInputKeyDown = useCallback((event) => {
     event.stopPropagation();
@@ -492,7 +496,6 @@ const OptimizedMentionEditor = ({
     const range = currentRangeRef.current;
     const editor = editorRef.current;
 
-    // Remove the @ character
     const textNode = range.startContainer;
     if (textNode.nodeType === Node.TEXT_NODE) {
       const text = textNode.textContent;
@@ -504,10 +507,25 @@ const OptimizedMentionEditor = ({
       }
     }
 
+    //deleting <span>@</span> that added when inserting @ via @icon click
+    let prevNode = null;
+  if (range.startContainer.nodeType === Node.TEXT_NODE) {
+    prevNode = range.startContainer.previousSibling;
+  } else if (range.startContainer.nodeType === Node.ELEMENT_NODE) {
+    prevNode = range.startContainer.childNodes[range.startOffset - 1];
+  }
+
+  if (prevNode && prevNode.nodeType === Node.ELEMENT_NODE) {
+    const el = prevNode;
+    if (el.tagName === "SPAN" && el.textContent === "@") {
+      el.remove();
+    }
+  }
     // Create mention element
+    onMentionValueChange?.(tag,mentionValues?.[tag] || 'DEFAULT VALUE')
     const mentionElement = DOMUtils.createMentionElement(
       tag,
-      mentionValues[tag],
+      mentionValues?.[tag],
       editorId,
       inputHandlers
     );
@@ -632,6 +650,35 @@ const OptimizedMentionEditor = ({
     // Validate mentions
     validation.debouncedValidate(editor);
   }, [onContentChange, validation, handleAtSymbolInsertion]);
+
+
+  const insertEmoji = (emoji, editorId) => {
+    const editor = editorRef.current;
+    const selection = window.getSelection();
+    if (selection.rangeCount > 0) {
+      const range = selection.getRangeAt(0);
+      if (editor.contains(selection.anchorNode)) {
+        const emojiNode = document.createElement('span');
+        emojiNode.textContent = emoji.native;
+        range.insertNode(emojiNode);
+        range.setStartAfter(emojiNode);
+        range.collapse(true);
+        selection.removeAllRanges();
+        selection.addRange(range);
+      }
+      else {
+        const emojiNode = document.createElement('span');
+        emojiNode.textContent = emoji.native;
+        editor.appendChild(emojiNode);
+      }
+    } else {
+      const emojiNode = document.createElement('span');
+      emojiNode.textContent = emoji.native;
+      editor.appendChild(emojiNode);
+    }
+    // setShowEmojiPicker(false)
+    onContentChange(editor.innerText,editor.innerHTML)
+  };
 
   const handlePaste = useCallback((event) => {
     event.preventDefault();
@@ -759,7 +806,7 @@ const OptimizedMentionEditor = ({
   // Memoized styles
   const editorStyles = useMemo(() => ({
     ...STYLES.container,
-    border: `1px solid ${validation.errors.length > 0 ? '#f44336' : '#ccc'}`,
+    border: `1px solid ${(validation.errors.length > 0 || error) ? '#f44336' : '#ccc'}`,
     borderRadius: '4px',
     padding: '12px',
     minHeight: '40px',
@@ -773,15 +820,16 @@ const OptimizedMentionEditor = ({
 
   // ========================= EFFECTS =========================
   const handleClickOutside = useCallback((event) => {
-    // if (emojiPickerRef.current && !emojiPickerRef.current.contains(event.target)) {
-    //   // setOpenEmojiPicker(false);
-    //   // setMentionList(false)
-    // }
+
+    if (emojiPickerRef.current && !emojiPickerRef.current.contains(event.target) && !emojiIconRef.current.contains(event.target)) {
+        setShowEmojiPicker(false);
+      // setMentionList(false)
+    }
     if (
       suggestionsRef.current &&
       !suggestionsRef.current.contains(event.target) && !AtCharRef.current.contains(event.target)
     ) {
-      setShowSuggestions(false); // Close the mention list
+      setShowSuggestions(false); 
     }
 
 
@@ -790,14 +838,12 @@ const OptimizedMentionEditor = ({
   useEffect(() => {
     document.addEventListener('click', handleClickOutside);
     return () => document.removeEventListener('click', handleClickOutside);
-  }, []);
+  }, [handleClickOutside]);
 
-  // Initialize editor with parsed content
   useEffect(() => {
     initializeEditor();
   }, [initializeEditor]);
 
-  // Update mention values when they change externally
   useEffect(() => {
     if (editorRef.current) {
       const inputs = editorRef.current.querySelectorAll(`input[data-editor-id="${editorId}"]`);
@@ -832,7 +878,7 @@ const OptimizedMentionEditor = ({
         </div>
 
       {/* Action Icons */}
-      <div style={{ position: 'absolute', right: 8, top: 8, display: 'flex', gap: 4 }}>
+      <div style={{ position: 'absolute', right: 8, top: 8, gap: 4 }}>
         {mentionTags.length > 0 && (
           <button
             type="button"
@@ -848,25 +894,28 @@ const OptimizedMentionEditor = ({
             title="Insert mention"
           >
             {/* <AtSign size={16} /> */}
-            @
+            &#64;
           </button>
         )}
         
         {showEmoji && (
+            <div>
           <button
             type="button"
-            onClick={() => setShowEmojiPicker(!showEmojiPicker)}
+            ref = {emojiIconRef}
+            onClick={(e) => {setShowEmojiPicker(!showEmojiPicker);setAnchorEl(e.currentTarget)}}
             style={{ 
               background: 'none', 
               border: 'none', 
               cursor: 'pointer',
               color: '#666',
-              padding: 4
+              padding: 4,
             }}
             title="Insert emoji"
           >
-            #$
+            &#128512;
           </button>
+          </div>
         )}
       </div>
 
@@ -919,7 +968,9 @@ const OptimizedMentionEditor = ({
           {error}
         </div>
       )}
+
      
+     {showEmoji && <EmojiPicker emojiPickerRef={emojiPickerRef} open={showEmojiPicker} onClose={() => setShowEmojiPicker(false)} anchorEl={anchorEl} onSelect={(emoji) => insertEmoji(emoji, editorId)} locale={locale}/>}
 
       {/* CSS */}
       <style jsx>{`
