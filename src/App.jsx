@@ -64,19 +64,6 @@ function App() {
           onBlur={(e) => { }}
           error=''
           isUrlField
-          style = {{containerStyle : {
-            backgroundColor:'red'
-          },
-           editorStyle : {
-            backgroundColor : "yellow"
-           },
-           mentionListStyle : {
-             backgroundColor:"white"
-           },
-           mentionItemStyle : {
-            backgroundColor : "grey",
-           },
-          }}
         />
       </div>
     </div>

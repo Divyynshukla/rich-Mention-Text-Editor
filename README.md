@@ -1,6 +1,6 @@
-# React + Vite + MentionsTextEditor
+# React + Vite + SmartMentionEditor
 
-This project provides a minimal setup using **React** and **Vite** with **HMR**, ESLint, and a custom component called `OptimizedMentionEditor`.
+This project provides a minimal setup using **React** and **Vite**, ESLint, and a custom component called `SmartMentionEditor`.
 
 Two official plugins can be used:
 
