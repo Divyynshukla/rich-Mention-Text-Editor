@@ -12,10 +12,11 @@ Two official plugins can be used:
 ## ✨ Features
 
 - ✅ Fast development with Vite and HMR.
-- ✅ Minimal ESLint configuration.
-- ✅ Custom Mentions Editor (`OptimizedMentionEditor`).
-- ✅ Emoji support.
+- ✅ Custom Mentions Editor (`SmartMentionEditor`).
+- ✅ Emoji support with emoji-mart.
 - ✅ Mentions input with dynamic tags like `@tag`.
+- ✅ Customize styling of mentionList,MentionListItem,editor,container.
+- ✅ Customize your mention as `@tag` or `@tag[input_field]`.
 
 ---
 
@@ -23,68 +24,93 @@ Two official plugins can be used:
 ## Example
 
 ```jsx
-import { useCallback, useState } from "react";
-import SmartMentionEditor from "./MentionsTextEditor";
+import { useCallback, useState } from "react"
+import SmartMentionEditor from 'richmentiontexteditor'
 
 function Example() {
-  const [mentionValues, setMentionsValues] = useState({
-    add_to_cart: "value of cart"
-  });
-
+  const [mentionValues, setMentionsValues] = useState({ add_to_cart: "value of cart" })
   const [value, setValue] = useState("");
-  const mentionTags = ["add_to_cart", "price", "flying_to"];
 
+  const mentionTags = ['add_to_cart', 'price', 'flying_to']
   const onContentChange = useCallback((text, html) => {
-    setValue(text);
-  }, []);
-
+    setValue(text)
+  }, [])
   const onMentionValueChange = useCallback((id, value) => {
-    setMentionsValues((prev) => ({
-      ...prev,
+    setMentionsValues((prevMentions) => ({
+      ...prevMentions,
       [id]: value
     }));
-  }, []);
+  }, [])
+
+  const initialValues = {
+    mentionFieldValue1: '',
+    mentionFieldValue2: ''
+  }
 
   const handleBlur = () => {
-    // handle blur event
-  };
+
+  }
 
   return (
-    <div>
-      <SmartMentionEditor
-        editorId="editor-1"
-        mentionTags={mentionTags}
-        onContentChange={onContentChange}
-        onValidationChange={(one, two) => {}}
-        onMentionValueChange={onMentionValueChange}
-        className=""
-        disabled={false}
-        showMentionInput
-        showEmoji
-        mentionValues={mentionValues}
-        onBlur={handleBlur}
-        error=""
-      />
+    <div style={{ margin: "10rem" }}>
+       
+       <div style={{margin:'1rem' ,width:"30rem"}}>
+        <SmartMentionEditor
+          editorId='mentionFieldValue'
+          mentionTags={mentionTags}
+          initialContent={initialValues.mentionFieldValue1}
+          placeholder='Type your message...'
+          showEmoji
+          onContentChange={(text, html) => onContentChange(text, html)}
+          onValidationChange={(isValid, error) => {}}
+          onMentionValueChange={onMentionValueChange}
+          className=''
+          disabled={false}
+          showMentionInput
+          mentionValues={mentionValues}
+          onBlur={handleBlur}
+          error={''}
+        />
+       </div>
 
-      <SmartMentionEditor
-        editorId="editor-2"
-        mentionTags={mentionTags}
-        onContentChange={onContentChange}
-        onValidationChange={(one, two) => {}}
-        onMentionValueChange={onMentionValueChange}
-        className=""
-        disabled={false}
-        mentionValues={mentionValues}
-        onBlur={() => {}}
-        error=""
-        style={{ border: "1px solid #ddd" }}
-        isUrlField
-      />
+        
+      <div style={{margin:'1rem' ,width:"30rem"}}>
+        <SmartMentionEditor
+          editorId='mentionFieldValue2'
+          mentionTags={mentionTags}
+          initialContent={initialValues.mentionFieldValue2}
+          placeholder='Type your message...'
+          // showEmoji
+          onContentChange={(text, html) => { }}
+          onValidationChange={(isValid, error) => {}}
+          onMentionValueChange={onMentionValueChange}
+          className=''
+          disabled={false}
+          mentionValues={mentionValues}
+          onBlur={(e) => { }}
+          error=''
+          isUrlField
+          style = {{containerStyle : {
+            backgroundColor:'red'
+          },
+           editorStyle : {
+            backgroundColor : "yellow"
+           },
+           mentionListStyle : {
+             backgroundColor:"white"
+           },
+           mentionItemStyle : {
+            backgroundColor : "grey",
+           },
+          }}
+        />
+      </div>
     </div>
-  );
+  )
 }
 
-export default Example;
+export default Example
+
 ```
 
 
@@ -105,5 +131,5 @@ export default Example;
 | `disabled`             | `boolean`                   | ❌        | `false` | If `true`, disables the editor.                                  |
 | `error`                | `string`                    | ❌        | `''`    | Displays error message if any.                                   |
 | `onBlur`               | `() => void`                | ❌        | —       | Callback when the editor loses focus.                            |
-| `style`                | `object`                    | ❌        | —       | Inline styles for the editor container.                          |
+| `style`                | `object`                    | ❌        | —       | Inline styles for the editor container.                        |
 | `isUrlField`           | `boolean`                   | ❌        | `false` | If `true`, treats input as URL (styling or behavior may differ). |

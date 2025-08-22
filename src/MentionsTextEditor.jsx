@@ -1,6 +1,5 @@
 import React, { useState, useEffect, useRef, useCallback, useMemo } from "react";
-// import EmojiPicker from "./EmojiPicker";
-
+import EmojiIcon from './assets/happy.png'
 
 // ========================= CONSTANTS =========================
 const CONSTANTS = {
@@ -542,7 +541,8 @@ const SmartMentionEditor = ({
       mentionValues?.[tag],
       editorId,
       inputHandlers,
-      showMentionInput
+      showMentionInput,
+      style
     );
 
     // Insert mention
@@ -825,15 +825,21 @@ const SmartMentionEditor = ({
     ...STYLES.container,
     border: `1px solid ${(validation.errors.length > 0 || error) ? '#f44336' : '#ccc'}`,
     borderRadius: '4px',
-    padding: isUrlField ? '8px' : '12px 25px 12px 12px' ,
+    padding: isUrlField ? '8px 30px 8px 8px' : '12px 30px 12px 12px' ,
     minHeight: isUrlField ? '10px' : '40px',
     maxHeight: '200px',
     overflow: 'auto',
     outline: 'none',
     fontSize: '14px',
     lineHeight: '1.4',
-    ...style
+    ...style.editorStyle
   }), [validation.errors.length, style]);
+
+  const containerStyles = useMemo(() => ({
+     position: "relative", overflow: "visible",
+     borderRadius: '4px',
+    ...style.containerStyle
+  }), [style]);
 
   // ========================= EFFECTS =========================
   const handleClickOutside = useCallback((event) => {
@@ -876,7 +882,7 @@ const SmartMentionEditor = ({
 
   // ========================= RENDER =========================
   return (
-    <div className={`mention-editor ${className}`} style={STYLES.container}>
+    <div className={`mention-container ${className}`} style={containerStyles}>
       {/* Editor */}
       <div
         ref={editorRef}
@@ -889,13 +895,13 @@ const SmartMentionEditor = ({
         onBlur={onBlur}
         style={editorStyles}
         data-placeholder={placeholder}
-        className="mention-editor-content"
+        className="mention-editor"
       >
         {content}
         </div>
 
       {/* Action Icons */}
-      <div style={{ position: 'absolute', right: 8, top: 8, gap: 4 ,display : isUrlField && "flex"}}>
+      <div style={{ position: 'absolute', right: 8, top: 6, gap: 2 ,display : "flex" ,alignItems:"center",flexDirection: isUrlField ? "row":"column"}}>
         {mentionTags.length > 0 && (
           <button
             type="button"
@@ -906,7 +912,9 @@ const SmartMentionEditor = ({
               border: 'none', 
               cursor: 'pointer',
               color: '#666',
-              padding: 4
+              padding: 4,
+              fontSize : "15px"
+
             }}
             title="Insert mention"
           >
@@ -929,19 +937,19 @@ const SmartMentionEditor = ({
             }}
             title="Insert emoji"
           >
-            &#128512;
+          <img src={EmojiIcon} style = {{width:"15px"}}/>
           </button>
           </div>
         )}
       </div>
-
       {showSuggestions && mentionTags.length > 0 && (
         <div
           ref={suggestionsRef}
           style={{
             ...STYLES.mentionList,
             left: suggestions.position.left,
-            top: suggestions.position.top
+            top: suggestions.position.top,
+            ...style.mentionListStyle
           }}
         >
           {mentionTags.map((tag, index) => (
@@ -952,7 +960,8 @@ const SmartMentionEditor = ({
               style={{
                 ...STYLES.mentionItem,
                 backgroundColor: index === suggestions.focusedIndex ? '#1976d2' : 'transparent',
-                color: index === suggestions.focusedIndex ? 'white' : 'black'
+                color: index === suggestions.focusedIndex ? 'white' : 'black',
+                ...style.mentionItemStyle
               }}
             >
               {tag}
@@ -989,13 +998,13 @@ const SmartMentionEditor = ({
 
       {/* CSS */}
       <style jsx>{`
-        .mention-editor-content:empty:before {
+        .mention-editor:empty:before {
           content: attr(data-placeholder);
           color: #999;
           pointer-events: none;
         }
         
-        .mention-editor-content:focus:before {
+        .mention-editor:focus:before {
           display: none;
         }
         

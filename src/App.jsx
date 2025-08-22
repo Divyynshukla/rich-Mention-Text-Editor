@@ -36,7 +36,7 @@ function App() {
           placeholder='Type your message...'
           showEmoji
           onContentChange={(text, html) => onContentChange(text, html)}
-          onValidationChange={(one, two) => { }}
+          onValidationChange={(isValid, error) => {}}
           onMentionValueChange={onMentionValueChange}
           className=''
           disabled={false}
@@ -56,15 +56,27 @@ function App() {
           placeholder='Type your message...'
           // showEmoji
           onContentChange={(text, html) => { }}
-          onValidationChange={(one, two) => { }}
+          onValidationChange={(isValid, error) => {}}
           onMentionValueChange={onMentionValueChange}
           className=''
           disabled={false}
           mentionValues={mentionValues}
           onBlur={(e) => { }}
           error=''
-          style
           isUrlField
+          style = {{containerStyle : {
+            backgroundColor:'red'
+          },
+           editorStyle : {
+            backgroundColor : "yellow"
+           },
+           mentionListStyle : {
+             backgroundColor:"white"
+           },
+           mentionItemStyle : {
+            backgroundColor : "grey",
+           },
+          }}
         />
       </div>
     </div>
