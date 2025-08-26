@@ -973,10 +973,11 @@ const SmartMentionEditor = ({
       {/* Error Message */}
       {validation.errorMessage && (
         <div style={{ 
-          color: '#f44336', 
-          fontSize: '12px', 
-          marginTop: '4px',
-          paddingLeft: '12px'
+          color: '#dc2626', 
+          fontSize: '75%', 
+          marginTop: '3px',
+          fontWeight : 500,
+          lineHeight: 1.66
         }}>
           {validation.errorMessage}
         </div>
@@ -984,10 +985,11 @@ const SmartMentionEditor = ({
      
      {error && (
         <div style={{ 
-          color: '#f44336', 
-          fontSize: '12px', 
-          marginTop: '4px',
-          paddingLeft: '12px'
+          color: '#dc2626', 
+          fontSize: '75%', 
+          marginTop: '3px',
+          fontWeight : 500,
+          lineHeight: 1.66
         }}>
           {error}
         </div>

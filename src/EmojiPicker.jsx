@@ -97,7 +97,7 @@ function EmojiPicker({ emojiPickerRef, open, onClose, anchorEl, onSelect,locale 
                 <div
                     ref={emojiPickerRef}
                     className="iz-popover"
-                    anchorEl={anchorEl}
+                    // anchorEl={anchorEl}
                 >
                     <Picker
                         theme="dark"
