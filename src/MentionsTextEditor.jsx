@@ -13,6 +13,20 @@ const CONSTANTS = {
 
 const STYLES = {
   container: { position: "relative", overflow: "visible" },
+  mentionSpanWithoutInputField : {
+    direction: 'ltr',
+    display: 'inline-block',
+    backgroundColor: '#f6fbff',
+    color: '#1194ff',
+    borderRadius: '1.25rem',
+    border: '0.0625rem solid',
+    margin: '0rem 0.100rem 0.125rem 0.0625rem',
+    lineHeight: '1.25rem',
+    fontSize: '0.75rem',
+    '> span': {
+      margin: '0 6px',
+    },
+  },
   mentionSpan: {
     display: 'inline-flex',
     alignItems: 'center',
@@ -84,7 +98,7 @@ class DOMUtils {
     const wrapper = document.createElement('span');
     wrapper.className = 'mention-wrapper';
     wrapper.contentEditable = 'false';
-    wrapper.style.cssText = Object.entries(STYLES.mentionSpan)
+    wrapper.style.cssText = Object.entries(showMentionInput ? STYLES.mentionSpan : STYLES.mentionSpanWithoutInputField)
       .map(([key, val]) => `${key.replace(/([A-Z])/g, '-$1').toLowerCase()}: ${val}`)
       .join('; ');
 
@@ -168,7 +182,7 @@ class TextParser {
 
         // Handle URLs
         let result = text.replace(CONSTANTS.URL_PATTERN, (url) => {
-            return `<a href="${url}" target="_blank" rel="noopener noreferrer">${url}</a>`;
+            return `<a href="${url}" target="_blank" rel="noopener noreferrer" style="color: inherit; text-decoration: none;">${url}</a>`;
         });
 
         // Handle mentions
@@ -181,7 +195,7 @@ class TextParser {
                 if (showMentionInput) {
                     const inputValue = mentionValues[mentionText] || CONSTANTS.DEFAULT_VALUE;
 
-                    return ` <span class="mention-wrapper" contenteditable="false" style="display:inline-flex;align-items:center;background-color:#e3f2ff;padding:3.5px;color:#4a7cb5;border-radius:4px;margin:0 2px;">
+                return ` <span class="mention-wrapper" contenteditable="false" style="display:inline-flex;align-items:center;background-color:#e3f2ff;padding:3.5px;color:#4a7cb5;border-radius:4px;margin:0 2px;">
                <span style="display:inline-block;max-width:150px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-right:4px;">
                @${matchingTag}
               </span>
@@ -189,16 +203,16 @@ class TextParser {
              style="width:7rem;height:16px;border:1px solid lightgrey;outline:none;font-size:0.75rem;padding:2px 4px;" 
             value="${inputValue}">
              </span> ${mentionText.slice(matchingTag.length)}`;
-                }
-                else {
-                    return ` <span class="mention-wrapper" contenteditable="false" style="display:inline-flex;align-items:center;background-color:#e3f2ff;padding:3.5px;color:#4a7cb5;border-radius:4px;margin:0 2px;">
-               <span style="display:inline-block;max-width:150px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-right:4px;">
-               @${matchingTag}
-              </span>
+              }
+              else {
+                return ` <span class="mention-wrapper" contenteditable="false" style="display:inline-flex;align-items:center;background-color:#f6fbff;color:#1194ff;border-radius:1.25rem;margin:0rem 0.100rem 0.125rem 0.0625rem;line-height:1.25rem;font-size:0.75rem;border:0.0625rem solid;">
+  <span style="display:inline-block;max-width:150px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-right:4px;margin:0 6px;">
+    @${matchingTag}
+  </span>
+</span>
              </span> ${mentionText.slice(matchingTag.length)}`;
-                }
+              }
             }
-
             return mention;
         });
 
@@ -757,7 +771,7 @@ const SmartMentionEditor = memo(({
 
   const handleMentionIconClick = useCallback(() => {
     const editor = editorRef.current;
-    if (!editor) return;
+    if (!editor || disabled) return;
 
     editor.focus();
     
@@ -835,6 +849,8 @@ const SmartMentionEditor = memo(({
     outline: 'none',
     fontSize: '14px',
     lineHeight: '1.4',
+    opacity: disabled ? "50%" : "100%",
+    cursor: disabled ? "not-allowed" : "",
     wordBreak: "break-all",
     ...style.editorStyle
   }), [validation.errors.length, style]);
@@ -914,8 +930,9 @@ const SmartMentionEditor = memo(({
             style={{ 
               background: 'none', 
               border: 'none', 
-              cursor: 'pointer',
+              cursor: disabled ? 'not-allowed' : 'pointer',
               color: '#666',
+              opacity : disabled ? '50%' : '100%',
               padding: 4,
               fontSize : "15px"
 
@@ -928,21 +945,26 @@ const SmartMentionEditor = memo(({
         
         {showEmoji && (
             <div>
-          <button
-            type="button"
-            ref = {emojiIconRef}
-            onClick={(e) => {setShowEmojiPicker(!showEmojiPicker);setAnchorEl(e.currentTarget)}}
-            style={{ 
-              background: 'none', 
-              border: 'none', 
-              cursor: 'pointer',
-              color: '#666',
-              padding: 4,
-            }}
-            title="Insert emoji"
-          >
-          <img src={EmojiIcon} style = {{width:"15px"}}/>
-          </button>
+            <button
+              type="button"
+              ref={emojiIconRef}
+              onClick={(e) => {
+                if (disabled) return;
+                setShowEmojiPicker(!showEmojiPicker); setAnchorEl(e.currentTarget)
+              }
+              }
+              style={{
+                background: 'none',
+                border: 'none',
+                cursor: disabled ? 'not-allowed' : 'pointer',
+                color: '#666',
+                opacity : disabled ? '50%' : '100%',
+                padding: 4,
+              }}
+              title="Insert emoji"
+            >
+              <img src={EmojiIcon} style={{ width: "15px" }} />
+            </button>
           </div>
         )}
       </div>
