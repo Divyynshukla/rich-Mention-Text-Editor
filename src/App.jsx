@@ -28,7 +28,7 @@ function App() {
   return (
     <div style={{ margin: "10rem" }}>
        
-       <div style={{margin:'1rem' ,width:"30rem"}}>
+       <div style={{marginTop:'1rem' ,width:"30rem"}}>
         <SmartMentionEditor
           editorId='mentionFieldValue'
           mentionTags={mentionTags}
@@ -48,7 +48,7 @@ function App() {
        </div>
 
         
-      <div style={{margin:'1rem' ,width:"30rem"}}>
+      <div style={{marginTop:'5rem' ,width:"30rem"}}>
         <SmartMentionEditor
           editorId='mentionFieldValue2'
           mentionTags={mentionTags}

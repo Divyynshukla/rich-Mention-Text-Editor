@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef, useCallback, useMemo } from "react";
+import React, { useState, useEffect, useRef, useCallback, useMemo,memo } from "react";
 import EmojiIcon from './assets/happy.png'
 
 // ========================= CONSTANTS =========================
@@ -264,8 +264,9 @@ class ValidationUtils {
     let message = '';
     
     if (emptyErrors.length > 0) {
-      const mentions = emptyErrors.map(e => e.mentionId).join(', ');
-      message += `Default value is not allowed for: ${mentions}`;
+      const uniqueMentions = [...new Set(emptyErrors.map(e => e.mentionId))];
+      const mentionsStr = uniqueMentions.join(', ');
+      message += `Default value is not allowed for: ${mentionsStr}`;
     }
     
     if (lengthErrors.length > 0) {
@@ -356,7 +357,7 @@ const useValidation = (editorId, onValidationChange) => {
 };
 
 // ========================= MAIN COMPONENT =========================
-const SmartMentionEditor = ({
+const SmartMentionEditor = memo(({
   editorId = 'mention-editor-1',
   mentionTags = [],
   initialContent = '',
@@ -396,7 +397,7 @@ const SmartMentionEditor = ({
 
   
   // Event handlers
-  const handleInputChange = useCallback((event) => {
+  const handleMentionInputChange = useCallback((event) => {
     const { value } = event.target;
     const mentionId = event.target.dataset.mentionId;
     
@@ -408,6 +409,8 @@ const SmartMentionEditor = ({
     onMentionValueChange?.(mentionId, value);
     validation.debouncedValidate(editorRef.current);
   }, [onMentionValueChange, validation,mentionValues]);
+
+  const handleInputChange = useDebounce(handleMentionInputChange, CONSTANTS.DEBOUNCE_DELAY);
 
   const handleInputKeyDown = useCallback((event) => {
     event.stopPropagation();
@@ -832,6 +835,7 @@ const SmartMentionEditor = ({
     outline: 'none',
     fontSize: '14px',
     lineHeight: '1.4',
+    wordBreak: "break-all",
     ...style.editorStyle
   }), [validation.errors.length, style]);
 
@@ -971,29 +975,19 @@ const SmartMentionEditor = ({
       )}
 
       {/* Error Message */}
-      {validation.errorMessage && (
-        <div style={{ 
-          color: '#dc2626', 
-          fontSize: '75%', 
-          marginTop: '3px',
-          fontWeight : 500,
-          lineHeight: 1.66
-        }}>
-          {validation.errorMessage}
-        </div>
-      )}
-     
-     {error && (
-        <div style={{ 
-          color: '#dc2626', 
-          fontSize: '75%', 
-          marginTop: '3px',
-          fontWeight : 500,
-          lineHeight: 1.66
-        }}>
-          {error}
-        </div>
-      )}
+      {(validation.errorMessage || error) && (
+  <div style={{ 
+    position : "absolute",
+    top : "100%",
+    color: '#dc2626', 
+    fontSize: '75%', 
+    marginTop: '3px',
+    fontWeight: 500,
+    lineHeight: 1.66
+  }}>
+    {validation.errorMessage || error}
+  </div>
+)}
 
      
      {showEmoji && EmojiPickerComponent && <EmojiPickerComponent emojiPickerRef={emojiPickerRef} open={showEmojiPicker} onClose={() => setShowEmojiPicker(false)} anchorEl={anchorEl} onSelect={(emoji) => insertEmoji(emoji, editorId)} locale={locale}/>}
@@ -1016,6 +1010,6 @@ const SmartMentionEditor = ({
       `}</style>
     </div>
   );
-};
+});
 
 export default SmartMentionEditor;
