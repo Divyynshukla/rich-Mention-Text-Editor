@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef, useCallback, useMemo,memo } from "react";
+import React, { useState, useEffect, useRef, useCallback, useMemo} from "react";
 import EmojiIcon from './assets/happy.png'
 
 // ========================= CONSTANTS =========================
@@ -15,17 +15,16 @@ const STYLES = {
   container: { position: "relative", overflow: "visible" },
   mentionSpanWithoutInputField : {
     direction: 'ltr',
-    display: 'inline-block',
+    display: 'inline-flex',
+    alignItems :'center',
     backgroundColor: '#f6fbff',
     color: '#1194ff',
     borderRadius: '1.25rem',
     border: '0.0625rem solid',
-    margin: '0rem 0.100rem 0.125rem 0.0625rem',
+    margin: '0rem 0.100rem 0.125rem 0.0725rem',
+    padding : "0px 5px",
     lineHeight: '1.25rem',
     fontSize: '0.75rem',
-    '> span': {
-      margin: '0 6px',
-    },
   },
   mentionSpan: {
     display: 'inline-flex',
@@ -34,7 +33,7 @@ const STYLES = {
     padding: '3.5px',
     color: '#4a7cb5',
     borderRadius: '4px',
-    margin: '0 2px'
+    margin: '1px 2px',
   },
   mentionInput: {
     width: '7rem',
@@ -56,10 +55,13 @@ const STYLES = {
     border: "1px solid #e0e0e0"
   },
   mentionItem: {
-    padding: "10px 15px",
     cursor: "pointer",
     borderBottom: "1px solid #f0f0f0",
-    transition: "background-color 0.2s ease"
+    transition: "background-color 0.2s ease",
+    padding: "10px 10px", 
+    overflow: "hidden",
+    textOverflow: "ellipsis",
+    maxWidth: "250px"
   }
 };
 
@@ -105,7 +107,11 @@ class DOMUtils {
     const label = document.createElement('span');
     label.textContent = `@${tag}`;
     label.style.marginRight = '4px';
-
+    label.style.maxWidth = '150px',
+    label.style.whiteSpace = 'nowrap',
+    label.style.overflow = 'hidden',
+    label.style.textOverflow = 'ellipsis'
+    
     const input = document.createElement('input');
     input.type = 'text';
     input.value = value || CONSTANTS.DEFAULT_VALUE;
@@ -177,25 +183,25 @@ class DOMUtils {
 }
 
 class TextParser {
-    static parseTextToHTML(text, mentionTags, mentionValues, editorId,showMentionInput) {
-        if (!text) return '';
+  static parseTextToHTML(text, mentionTags, mentionValues, editorId, showMentionInput) {
+    if (!text) return '';
 
-        // Handle URLs
-        let result = text.replace(CONSTANTS.URL_PATTERN, (url) => {
-            return `<a href="${url}" target="_blank" rel="noopener noreferrer" style="color: inherit; text-decoration: none;">${url}</a>`;
-        });
+    // Handle URLs
+    let result = text.replace(CONSTANTS.URL_PATTERN, (url) => {
+      return `<a href="${url}" target="_blank" rel="noopener noreferrer" style="color: inherit; text-decoration: none;">${url}</a>`;
+    });
 
-        // Handle mentions
-        result = result.replace(CONSTANTS.MENTION_PATTERN, (mention, mentionText) => {
-            mentionText = mentionText.trim();
-            const matchingTag = mentionTags.find(tag => mentionText.includes(tag));
+    // Handle mentions
+    result = result.replace(CONSTANTS.MENTION_PATTERN, (mention, mentionText) => {
+      mentionText = mentionText.trim();
+      const matchingTag = mentionTags.find(tag => mentionText.includes(tag));
 
-            if (matchingTag) {
+      if (matchingTag) {
 
-                if (showMentionInput) {
-                    const inputValue = mentionValues[mentionText] || CONSTANTS.DEFAULT_VALUE;
+        if (showMentionInput) {
+          const inputValue = mentionValues[mentionText] || CONSTANTS.DEFAULT_VALUE;
 
-                return ` <span class="mention-wrapper" contenteditable="false" style="display:inline-flex;align-items:center;background-color:#e3f2ff;padding:3.5px;color:#4a7cb5;border-radius:4px;margin:0 2px;">
+          return ` <span class="mention-wrapper" contenteditable="false" style="display:inline-flex;align-items:center;background-color:#e3f2ff;padding:3.5px;color:#4a7cb5;border-radius:4px;margin:0 2px;">
                <span style="display:inline-block;max-width:150px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-right:4px;">
                @${matchingTag}
               </span>
@@ -203,42 +209,42 @@ class TextParser {
              style="width:7rem;height:16px;border:1px solid lightgrey;outline:none;font-size:0.75rem;padding:2px 4px;" 
             value="${inputValue}">
              </span> ${mentionText.slice(matchingTag.length)}`;
-              }
-              else {
-                return ` <span class="mention-wrapper" contenteditable="false" style="display:inline-flex;align-items:center;background-color:#f6fbff;color:#1194ff;border-radius:1.25rem;margin:0rem 0.100rem 0.125rem 0.0625rem;line-height:1.25rem;font-size:0.75rem;border:0.0625rem solid;">
+        }
+        else {
+          return ` <span class="mention-wrapper" contenteditable="false" style="display:inline-flex;align-items:center;background-color:#f6fbff;color:#1194ff;border-radius:1.25rem;margin:0rem 0.100rem 0.125rem 0.0625rem;line-height:1.25rem;font-size:0.75rem;border:0.0625rem solid;">
   <span style="display:inline-block;max-width:150px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-right:4px;margin:0 6px;">
     @${matchingTag}
   </span>
 </span>
              </span> ${mentionText.slice(matchingTag.length)}`;
-              }
-            }
-            return mention;
-        });
-
-        return result;
-    }
-
-    static extractMentionsFromText(text, mentionTags) {
-        const mentions = [];
-        const matches = text.matchAll(CONSTANTS.MENTION_PATTERN);
-
-        for (const match of matches) {
-            const mentionText = match[1].trim();
-            const matchingTag = mentionTags.find(tag => mentionText.includes(tag));
-
-            if (matchingTag && !mentions.includes(matchingTag)) {
-                mentions.push(matchingTag);
-            }
         }
+      }
+      return mention;
+    });
 
-        return mentions;
+    return result;
+  }
+
+  static extractMentionsFromText(text, mentionTags) {
+    const mentions = [];
+    const matches = text.matchAll(CONSTANTS.MENTION_PATTERN);
+
+    for (const match of matches) {
+      const mentionText = match[1].trim();
+      const matchingTag = mentionTags.find(tag => mentionText.includes(tag));
+
+      if (matchingTag && !mentions.includes(matchingTag)) {
+        mentions.push(matchingTag);
+      }
     }
 
-    static cleanText(text) {
-        // Remove standalone @ characters
-        return text.replace(/(^|\s)@(?!\S)/g, "$1");
-    }
+    return mentions;
+  }
+
+  static cleanText(text) {
+    // Remove standalone @ characters
+    return text.replace(/(^|\s)@(?!\S)/g, "$1");
+  }
 
 }
 
@@ -371,7 +377,7 @@ const useValidation = (editorId, onValidationChange) => {
 };
 
 // ========================= MAIN COMPONENT =========================
-const SmartMentionEditor = memo(({
+const SmartMentionEditor = ({
   editorId = 'mention-editor-1',
   mentionTags = [],
   initialContent = '',
@@ -605,6 +611,9 @@ const SmartMentionEditor = memo(({
           }
           break;
         case 'Escape':
+          setShowSuggestions(false);
+          break;
+        case 'Backspace' :
           setShowSuggestions(false);
           break;
       }
@@ -985,7 +994,7 @@ const SmartMentionEditor = memo(({
               onMouseEnter={() => suggestions.setFocusedIndex(index)}
               style={{
                 ...STYLES.mentionItem,
-                backgroundColor: index === suggestions.focusedIndex ? '#1976d2' : 'transparent',
+                backgroundColor: index === suggestions.focusedIndex ? '#1194ff' : 'transparent',
                 color: index === suggestions.focusedIndex ? 'white' : 'black',
                 ...style.mentionItemStyle
               }}
@@ -1005,7 +1014,11 @@ const SmartMentionEditor = memo(({
     fontSize: '75%', 
     marginTop: '3px',
     fontWeight: 500,
-    lineHeight: 1.66
+    lineHeight: 1.66,
+    whiteSpace : "nowrap",
+    textOverflow : "ellipsis",
+    overflow : "hidden",
+    maxWidth : "100%"
   }}>
     {validation.errorMessage || error}
   </div>
@@ -1032,6 +1045,6 @@ const SmartMentionEditor = memo(({
       `}</style>
     </div>
   );
-});
+};
 
 export default SmartMentionEditor;
