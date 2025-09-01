@@ -404,6 +404,7 @@ const SmartMentionEditor = ({
   const [EmojiPickerComponent,setEmojiPickerComponent] = useState(null)  
   const [savedRange,setCurrentRange] =  useState(null);
   const [anchorEl, setAnchorEl] = useState(null);
+  const [emojiPos,setEmojiPos] = useState();
   // Refs
   const editorRef = useRef(null);
   const suggestionsRef = useRef(null);
@@ -875,7 +876,6 @@ const SmartMentionEditor = ({
 
     if (emojiPickerRef.current && !emojiPickerRef.current.contains(event.target) && !emojiIconRef.current.contains(event.target)) {
         setShowEmojiPicker(false);
-      // setMentionList(false)
     }
     if (
       suggestionsRef.current &&
@@ -887,9 +887,23 @@ const SmartMentionEditor = ({
 
   }, []);
 
+  const handleScroll = useCallback((event) => {
+    if (
+      emojiPickerRef.current &&
+      emojiPickerRef.current.contains(event.target) 
+    ) {
+      return; 
+    }
+    setShowEmojiPicker(false); 
+  }, []);
+  
   useEffect(() => {
+    document.addEventListener('scroll',handleScroll);
     document.addEventListener('click', handleClickOutside);
-    return () => document.removeEventListener('click', handleClickOutside);
+    return () => {
+      document.removeEventListener('click', handleClickOutside);
+      document.addEventListener('scroll',handleScroll)
+    }
   }, [handleClickOutside]);
 
   useEffect(() => {
@@ -959,12 +973,19 @@ const SmartMentionEditor = ({
               ref={emojiIconRef}
               onClick={(e) => {
                 if (disabled) return;
-                setShowEmojiPicker(!showEmojiPicker); setAnchorEl(e.currentTarget)
+                const emojiPickerWidth = 350;
+                const spaceRight = window.innerWidth - e.clientX;
+                const newLeft =
+                  spaceRight >= emojiPickerWidth
+                    ? e.clientX + 8
+                    : e.clientX - emojiPickerWidth - 8;
+                setEmojiPos({ left: newLeft, top: e.clientY + 5 }); 
+                setShowEmojiPicker(!showEmojiPicker);
               }
               }
               style={{
                 background: 'none',
-                border: 'none',
+                border: 'none',/////
                 cursor: disabled ? 'not-allowed' : 'pointer',
                 color: '#666',
                 opacity : disabled ? '50%' : '100%',
@@ -1025,7 +1046,7 @@ const SmartMentionEditor = ({
 )}
 
      
-     {showEmoji && EmojiPickerComponent && <EmojiPickerComponent emojiPickerRef={emojiPickerRef} open={showEmojiPicker} onClose={() => setShowEmojiPicker(false)} anchorEl={anchorEl} onSelect={(emoji) => insertEmoji(emoji, editorId)} locale={locale}/>}
+     {showEmoji && EmojiPickerComponent && <EmojiPickerComponent emojiPickerRef={emojiPickerRef} open={showEmojiPicker} onClose={() => setShowEmojiPicker(false)} anchorEl={anchorEl} onSelect={(emoji) => insertEmoji(emoji, editorId)} locale={locale} emojiPos={emojiPos}/>}
 
       {/* CSS */}
       <style jsx>{`

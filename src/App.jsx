@@ -5,7 +5,7 @@ function App() {
   const [mentionValues, setMentionsValues] = useState({ add_to_cart: "value of cart" })
   const [value, setValue] = useState("");
 
-  const mentionTags = ['add_to_cart', 'price', 'flying_tying_tying_tying_tying_tying_tying_tying_tying_tying_tying_tying_tying_to']
+  const mentionTags = ['add_to_cart', 'price', 'flying_tying']
   const onContentChange = useCallback((text, html) => {
     setValue(text)
   }, [])
@@ -26,9 +26,10 @@ function App() {
   }
 
   return (
-    <div style={{marginLeft:"5rem"}}>
+    <>    
+    <div style={{margin:"20rem"}}>
        
-       <div style={{marginTop:'1rem' ,width:"40rem"}}>
+       <div style={{marginTop:'10rem' ,width:"40rem"}}>
         <SmartMentionEditor
           editorId='mentionFieldValue'
           mentionTags={mentionTags}
@@ -53,6 +54,7 @@ function App() {
        </div>
 
         
+        <div>
       <div style={{marginTop:'5rem' ,width:"30rem"}}>
         <SmartMentionEditor
           editorId='mentionFieldValue2'
@@ -71,7 +73,9 @@ function App() {
           isUrlField
         />
       </div>
+      </div>
     </div>
+    </>
   )
 }
 
