@@ -34,8 +34,10 @@ function EmojiPicker({
         left: emojiPos?.left,
         top: emojiPos?.top,
         zIndex: 10000,
-        maxHeight: "400px",   
+        maxHeight: "360px",   
         overflowY: "auto", 
+        borderRadius : '8px',
+        background: 'rgba(0, 0, 0, 0.6)',
       }}
     >
       <Picker

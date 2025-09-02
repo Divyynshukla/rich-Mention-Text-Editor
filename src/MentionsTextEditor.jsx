@@ -873,7 +873,6 @@ const SmartMentionEditor = ({
 
   // ========================= EFFECTS =========================
   const handleClickOutside = useCallback((event) => {
-
     if (emojiPickerRef.current && !emojiPickerRef.current.contains(event.target) && !emojiIconRef.current.contains(event.target)) {
         setShowEmojiPicker(false);
     }
@@ -898,13 +897,19 @@ const SmartMentionEditor = ({
   }, []);
   
   useEffect(() => {
-    document.addEventListener('scroll',handleScroll);
-    document.addEventListener('click', handleClickOutside);
+    const dialogPaper = document.querySelector(".mentions-dialog");
+    if (!dialogPaper) return;
+
+    dialogPaper.addEventListener("scroll", handleScroll);
+    document.addEventListener("click", handleClickOutside);
+    document.addEventListener('scroll',handleScroll)
+  
     return () => {
-      document.removeEventListener('click', handleClickOutside);
-      document.addEventListener('scroll',handleScroll)
-    }
-  }, [handleClickOutside]);
+      dialogPaper.removeEventListener("scroll", handleScroll);
+      document.removeEventListener("click", handleClickOutside);
+      document.removeEventListener('scroll',handleScroll);
+    };
+  }, [handleClickOutside, handleScroll]);
 
   useEffect(() => {
     initializeEditor();

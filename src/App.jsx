@@ -27,9 +27,10 @@ function App() {
 
   return (
     <>    
-    <div style={{margin:"20rem"}}>
+    <div style={{margin:"10rem"}}>
        
-       <div style={{marginTop:'10rem' ,width:"40rem"}}>
+        <div className="mentions-dialog" style={{maxHeight:"500px" ,overflow:"scroll",width:"30rem"}}>
+       <div style={{height:"800px"}}>
         <SmartMentionEditor
           editorId='mentionFieldValue'
           mentionTags={mentionTags}
@@ -52,10 +53,8 @@ function App() {
           }}
         />
        </div>
-
-        
-        <div>
-      <div style={{marginTop:'5rem' ,width:"30rem"}}>
+       </div>
+       <div style={{marginTop:'5rem' ,width:"30rem"}}>
         <SmartMentionEditor
           editorId='mentionFieldValue2'
           mentionTags={mentionTags}
@@ -73,6 +72,10 @@ function App() {
           isUrlField
         />
       </div>
+
+        
+        <div>
+    
       </div>
     </div>
     </>
